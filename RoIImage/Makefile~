@@ -1,0 +1,15 @@
+CC		= g++ -g
+OPENCV	= `pkg-config --libs opencv`
+CURL	= -lcurl
+OPT		= -L/path/lib -I/path/include/
+
+all: Smarttable
+
+Smarttable: Smarttable.o
+	$(CC) -o $@ $< $(CURL) $(OPENCV)
+
+Smarttable.o: Smarttable.c
+	$(CC) $(OPT) -c $<
+
+clean:
+	rm -rf Smarttable *.o

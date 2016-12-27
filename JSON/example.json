@@ -1,0 +1,9 @@
+{
+	"requests": [{
+		"image": {
+			"content": "base62 code" },
+			"features": [{
+				"tpye": "LABEL_DETECTION", "maxResults": 1
+			}]
+	}]
+}

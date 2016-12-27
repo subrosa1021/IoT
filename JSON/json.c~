@@ -1,0 +1,123 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
+
+typedef enum _TOKEN_TYPE{
+	TOKEN_STRING,
+	TOKEN_NUMBER,
+} TOKEN_TYPE;
+
+typedef struct _TOKEN{
+	TOKEN_TYPE type;
+	union{
+		char *string;
+		double number;
+	};
+	bool isArray;
+}TOKEN;
+
+#define TOKEN_COUNT 20
+
+typedef struct _JSON{
+	TOKEN tokens[TOKEN_COUNT];
+} JSON;
+
+char *readFile(char *filename, int *readSize){
+
+	FILE *fp = fopen(filename, "rb");
+	if(fp == NULL)
+		return NULL;
+
+	int size;
+	char *buffer;
+
+	fseek(fp, 0, SEEK_END);
+	size = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+
+	buffer = malloc(size+1);
+	memset(buffer, 0, size);
+
+	if(fread(buffer, size, 1, fp) < 1){
+		*readSize = 0;
+		free(buffer);
+		fclose(fp);
+		return NULL;
+	}
+	*readSize = size;
+	fclose(fp);
+	return buffer;
+}
+
+
+void parseJSON(char *doc, int size, JSON *json){
+	int tokenIndex = 0;
+	int pos = 0;
+
+	if(doc[pos] != '{')
+		return;
+
+	pos++;
+
+	while(pos < size){
+		switch(doc[pos]){
+			case '"':
+			{
+				char *begin = doc + pos + 1;
+
+				char *end = strchr(begin, '"');
+				if(end == NULL)
+					break;
+
+				int stringLength = end - begin;
+
+				json->tokens[tokenIndex].type = TOKEN_STRING;
+				json->tokens[tokenIndex].string = malloc(stringLength + 1);
+				memset(json->tokens[tokenIndex].string, 0, stringLength + 1);
+
+				memcpy(json->tokens[tokenIndex].string, begin, stringLength);
+
+				tokenIndex++;
+
+				pos = pos + stringLength + 1;
+			}
+			break;
+		}
+		pos++;
+	}
+}
+
+void freeJSON(JSON *json){
+	for(int i=0 ; i<TOKEN_COUNT ; i++){
+		if(json->tokens[i].type == TOKEN_STRING)
+			free(json->tokens[i].string);
+	}
+}
+
+int main(){
+	int size;
+
+	char *doc = readFile("test.json", &size);
+	if( doc == NULL )
+		return -1;
+
+	JSON json= { 0, };
+	parseJSON(doc, size, &json);
+
+	printf("request: %s\n", json.tokens[0].string);
+	printf("image: %s\n", json.tokens[1].string);
+	printf("content: %s\n", json.tokens[2].string);
+	printf("code: %s\n", json.tokens[3].string);
+	printf("features: %s\n", json.tokens[4].string);
+	printf("type: %s\n", json.tokens[5].string);
+	printf("LABEL_DETECTION: %s\n", json.tokens[6].string);
+	printf("maxResults: %s\n", json.tokens[7].string);
+	printf("1: %s\n", json.tokens[8].string);
+	
+	freeJSON(&json);
+	free(doc);
+
+	return 0;
+}

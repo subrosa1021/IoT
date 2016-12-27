@@ -1,0 +1,14 @@
+CC		= gcc -g
+CURL	= -lcurl
+OPT		= -L/path/lib -I/path/include/
+
+all: fileget
+
+fileget: fileget.o
+	$(CC) -o $@ $< $(CURL)
+
+fileget.o: fileget.c
+	$(CC) $(OPT) -c $<
+
+clean:
+	rm -rf fileget *.o

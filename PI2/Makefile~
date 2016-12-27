@@ -1,0 +1,14 @@
+CC		= gcc -g
+LIBS	= -lpthread -lwiringPi
+
+all:webserver
+
+webserver:webserver.o
+	$(CC) -o $@ $< $(LIBS)
+
+webserver.o:webserver.c
+	$(CC) -c $<
+
+clean:
+	rm -rf webserver *.o
+
